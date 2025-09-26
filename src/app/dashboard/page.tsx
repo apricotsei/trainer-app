@@ -3,7 +3,7 @@ import { DashboardClient } from '@/components/DashboardClient';
 import { RowDataPacket } from 'mysql2';
 import { Trainer, Shift } from '@/types/db'; 
 import { getServerSession } from 'next-auth/next';
-import { authOptions } from '@/app/api/auth/[...nextauth]/route';
+import { authOptions } from '@/lib/auth';
 import { redirect } from 'next/navigation';
 
 // DBから特定のトレーナーのシフト一覧を取得する関数
