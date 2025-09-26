@@ -1,17 +1,17 @@
 import { db } from '@/lib/db';
 import { NextRequest, NextResponse } from 'next/server';
-import type { OkPacket } from 'mysql2/promise'; // mysql2/promiseからインポート
+import type { OkPacket } from 'mysql2/promise';
 
 type PatchBody = {
     status: 'confirmed' | 'rejected';
 }
 
-// 第2引数を'context'として受け取り、関数内で分解する
+// ★ 修正点: Next.js公式の型指定方法に修正
 export async function PATCH(
     request: NextRequest, 
-    context: { params: { shiftId: string } }
+    { params }: { params: { shiftId: string } }
 ) {
-    const { shiftId } = context.params; // ★ 関数の中で shiftId を取り出す
+    const { shiftId } = params; // これで shiftId を安全に取り出せる
 
     if (!shiftId || isNaN(Number(shiftId))) {
         return NextResponse.json({ error: '無効なシフトIDです。' }, { status: 400 });
