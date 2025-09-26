@@ -2,18 +2,15 @@ import { db } from '@/lib/db';
 import { NextRequest, NextResponse } from 'next/server';
 import type { OkPacket } from 'mysql2';
 
-type RouteContext = {
-    params: {
-        shiftId: string;
-    }
-}
-
 type PatchBody = {
     status: 'confirmed' | 'rejected'; // 更新後のステータス
 }
 
-// PATCHメソッドでシフトのステータスを更新する
-export async function PATCH(request: NextRequest, { params }: RouteContext) {
+// 関数の引数の型をNext.jsのルールに合わせて直接指定
+export async function PATCH(
+    request: NextRequest, 
+    { params }: { params: { shiftId: string } }
+) {
     const { shiftId } = params;
 
     if (!shiftId || isNaN(Number(shiftId))) {
@@ -23,7 +20,6 @@ export async function PATCH(request: NextRequest, { params }: RouteContext) {
     try {
         const { status } = (await request.json()) as PatchBody;
 
-        // ステータスが'confirmed'か'rejected'以外の場合はエラー
         if (status !== 'confirmed' && status !== 'rejected') {
             return NextResponse.json({ error: '無効なステータスです。' }, { status: 400 });
         }
@@ -36,7 +32,6 @@ export async function PATCH(request: NextRequest, { params }: RouteContext) {
 
         const [result] = await db.query<OkPacket>(sql, [status, shiftId]);
 
-        // 更新対象が見つからなかった場合（既に処理済みなど）
         if (result.affectedRows === 0) {
             return NextResponse.json({ error: '更新対象のシフトが見つからないか、既に処理済みです。' }, { status: 404 });
         }
