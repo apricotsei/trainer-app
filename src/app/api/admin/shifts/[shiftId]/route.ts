@@ -2,11 +2,6 @@ import { db } from '@/lib/db';
 import { NextRequest, NextResponse } from 'next/server';
 import type { OkPacket } from 'mysql2/promise';
 
-type PatchBody = {
-    status: 'confirmed' | 'rejected';
-}
-
-// ★ 修正点: Next.js公式の型指定方法に修正
 export async function PATCH(
     request: NextRequest, 
     { params }: { params: { shiftId: string } }
@@ -18,7 +13,8 @@ export async function PATCH(
     }
 
     try {
-        const { status } = (await request.json()) as PatchBody;
+        const body: { status: 'confirmed' | 'rejected' } = await request.json();
+        const { status } = body;
 
         if (status !== 'confirmed' && status !== 'rejected') {
             return NextResponse.json({ error: '無効なステータスです。' }, { status: 400 });
