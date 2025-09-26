@@ -6,26 +6,19 @@ type PatchBody = {
     status: 'confirmed' | 'rejected';
 }
 
-// Next.jsのルートハンドラの引数の型を、より明確なインターフェースとして分離
-// これにより、Vercelのビルドシステムが型を正しく解釈できるようになる
-interface RouteContext {
-    params: {
-        shiftId: string;
-    }
-}
-
+// ★ 修正点: Next.js公式の型指定方法に修正
+// 独自のinterfaceを削除し、引数で直接型を指定します
 export async function PATCH(
     request: NextRequest, 
-    context: RouteContext
+    { params }: { params: { shiftId: string } }
 ) {
-    const { shiftId } = context.params;
+    const { shiftId } = params; // これで shiftId を安全に取り出せる
 
     if (!shiftId || isNaN(Number(shiftId))) {
         return NextResponse.json({ error: '無効なシフトIDです。' }, { status: 400 });
     }
 
     try {
-        // インラインの型指定の代わりに、定義した PatchBody 型を使用
         const body: PatchBody = await request.json();
         const { status } = body;
 
@@ -38,8 +31,7 @@ export async function PATCH(
             SET status = ?
             WHERE id = ? AND status = 'pending'
         `;
-        
-        // ResultSetHeader を使用するように更新
+
         const [result] = await db.query<ResultSetHeader>(sql, [status, shiftId]);
 
         if (result.affectedRows === 0) {
