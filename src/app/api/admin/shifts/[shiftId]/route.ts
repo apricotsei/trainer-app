@@ -1,19 +1,32 @@
 import { db } from '@/lib/db';
 import { NextRequest, NextResponse } from 'next/server';
-import type { OkPacket } from 'mysql2/promise';
+import type { ResultSetHeader } from 'mysql2/promise';
+
+type PatchBody = {
+    status: 'confirmed' | 'rejected';
+}
+
+// Next.jsのルートハンドラの引数の型を、より明確なインターフェースとして分離
+// これにより、Vercelのビルドシステムが型を正しく解釈できるようになる
+interface RouteContext {
+    params: {
+        shiftId: string;
+    }
+}
 
 export async function PATCH(
     request: NextRequest, 
-    { params }: { params: { shiftId: string } }
+    context: RouteContext
 ) {
-    const { shiftId } = params; // これで shiftId を安全に取り出せる
+    const { shiftId } = context.params;
 
     if (!shiftId || isNaN(Number(shiftId))) {
         return NextResponse.json({ error: '無効なシフトIDです。' }, { status: 400 });
     }
 
     try {
-        const body: { status: 'confirmed' | 'rejected' } = await request.json();
+        // インラインの型指定の代わりに、定義した PatchBody 型を使用
+        const body: PatchBody = await request.json();
         const { status } = body;
 
         if (status !== 'confirmed' && status !== 'rejected') {
@@ -25,8 +38,9 @@ export async function PATCH(
             SET status = ?
             WHERE id = ? AND status = 'pending'
         `;
-
-        const [result] = await db.query<OkPacket>(sql, [status, shiftId]);
+        
+        // ResultSetHeader を使用するように更新
+        const [result] = await db.query<ResultSetHeader>(sql, [status, shiftId]);
 
         if (result.affectedRows === 0) {
             return NextResponse.json({ error: '更新対象のシフトが見つからないか、既に処理済みです。' }, { status: 404 });
