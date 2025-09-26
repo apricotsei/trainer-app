@@ -1,10 +1,10 @@
 import { db } from '@/lib/db';
 import { getServerSession } from 'next-auth/next';
 import { authOptions } from '@/app/api/auth/[...nextauth]/route';
-import { NextRequest, NextResponse } from 'next/server';
+import { NextResponse } from 'next/server';
 import type { RowDataPacket } from 'mysql2';
 
-export async function GET(_request: NextRequest) {
+export async function GET() {
     const session = await getServerSession(authOptions);
 
     if (!session?.user?.id) {

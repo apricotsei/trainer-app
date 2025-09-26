@@ -1,5 +1,5 @@
 import { db } from '@/lib/db';
-import { NextRequest, NextResponse } from 'next/server';
+import { NextResponse } from 'next/server';
 import type { RowDataPacket } from 'mysql2';
 
 // グループ化されるシフトの型を定義
@@ -11,7 +11,7 @@ type ShiftInGroup = {
 };
 
 // GETメソッドで'pending'状態のシフトをトレーナーごとにグループ化して取得する
-export async function GET(_request: NextRequest) {
+export async function GET() {
     try {
         const sql = `
             SELECT
